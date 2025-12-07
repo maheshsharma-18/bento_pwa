@@ -19,7 +19,8 @@ const resources = {
         login_google: "Continue with Google",
         login_email: "Continue with Email",
         visitor: "Visitor Mode",
-        terms: "I agree to the Terms of Service & Privacy Policy"
+        terms: "I agree to the Terms of Service & Privacy Policy",
+        terms_error: "You must accept the terms to continue."
       }
     }
   },
@@ -39,7 +40,8 @@ const resources = {
         login_google: "Continuar com Google",
         login_email: "Entrar com Email",
         visitor: "Modo Visitante",
-        terms: "Concordo com os Termos de Uso e Política de Privacidade"
+        terms: "Concordo com os Termos de Uso e Política de Privacidade",
+        terms_error: "Você precisa aceitar os termos para continuar."
       }
     }
   }
