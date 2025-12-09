@@ -1,12 +1,15 @@
 import { Play, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { Video } from "@/hooks/useVideos";
+import { useNavigate } from "react-router-dom";
 
 interface HeroBannerProps {
   video: Video;
 }
 
 export default function HeroBanner({ video }: HeroBannerProps) {
+  const navigate = useNavigate();
+
   return (
     <div className="relative w-full h-[450px] rounded-[32px] overflow-hidden mb-8">
       {/* Background Image with Gradient Overlay */}
@@ -29,6 +32,7 @@ export default function HeroBanner({ video }: HeroBannerProps) {
         {/* Buttons - Matching design exactly */}
         <div className="flex gap-4 w-full max-w-sm">
           <Button 
+            onClick={() => navigate(`/player/${video.id}`)}
             className="flex-1 h-14 bg-white text-text hover:bg-white/90 rounded-3xl text-lg font-bold"
           >
             <Play className="w-6 h-6 mr-2 fill-current" />

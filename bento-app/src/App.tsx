@@ -4,20 +4,23 @@ import Auth from "./pages/Auth";
 import Home from "./pages/Home";
 import Search from "./pages/Search";
 import Schedule from "./pages/Schedule";
+import Player from "./pages/Player"; // Import the Player
 import AppLayout from "./components/layout/AppLayout";
 
 function App() {
-  // Temporary: Set to true to test the internal layout
   const isAuthenticated = true; 
 
   return (
     <BrowserRouter>
       <Routes>
-        {/* Public Routes (No Bottom Bar) */}
+        {/* Public Routes */}
         <Route path="/welcome" element={<Welcome />} />
         <Route path="/auth" element={<Auth />} />
 
-        {/* Protected Routes (Has Bottom Bar) */}
+        {/* Player Route (No Bottom Bar) - Placed outside AppLayout */}
+        <Route path="/player/:videoId" element={<Player />} />
+
+        {/* Main App Routes (With Bottom Bar) */}
         <Route element={isAuthenticated ? <AppLayout /> : <Navigate to="/welcome" replace />}>
             <Route path="/" element={<Home />} />
             <Route path="/search" element={<Search />} />
@@ -29,4 +32,5 @@ function App() {
 }
 
 export default App
+
 

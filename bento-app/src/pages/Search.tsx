@@ -4,11 +4,13 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useVideos } from "@/hooks/useVideos";
 import { cn } from "@/lib/utils";
+import { useNavigate } from "react-router-dom";
 
 export default function Search() {
   const { data: videos, isLoading } = useVideos();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Todos");
+  const navigate = useNavigate();
 
   // Categories based on your database data
   const categories = ["Todos", "Aventuras", "Educativo", "Cantigas", "Aventuras dos Bichinhos"];
@@ -112,6 +114,7 @@ export default function Search() {
 
                 <Button 
                   size="sm" 
+                  onClick={() => navigate(`/player/${video.id}`)}
                   className="w-fit h-8 rounded-xl text-xs bg-primary/10 text-primary hover:bg-primary hover:text-white transition-colors px-4"
                 >
                   Assistir
@@ -135,4 +138,5 @@ export default function Search() {
     </div>
   );
 }
+
 

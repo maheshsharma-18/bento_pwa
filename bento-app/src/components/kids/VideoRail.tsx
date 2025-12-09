@@ -1,5 +1,6 @@
 import type { Video } from "@/hooks/useVideos";
 import { Play, Lock } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface VideoRailProps {
   title: string;
@@ -8,6 +9,8 @@ interface VideoRailProps {
 }
 
 export default function VideoRail({ title, icon, videos }: VideoRailProps) {
+  const navigate = useNavigate();
+
   if (videos.length === 0) return null;
 
   return (
@@ -23,7 +26,8 @@ export default function VideoRail({ title, icon, videos }: VideoRailProps) {
         {videos.map((video) => (
           <div 
             key={video.id} 
-            className="relative flex-none w-[220px] h-[140px] rounded-2xl overflow-hidden snap-start shadow-md"
+            onClick={() => navigate(`/player/${video.id}`)}
+            className="relative flex-none w-[220px] h-[140px] rounded-2xl overflow-hidden snap-start shadow-md cursor-pointer active:scale-95 transition-transform"
           >
             {/* Thumbnail */}
             <img 

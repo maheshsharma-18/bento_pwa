@@ -1,0 +1,67 @@
+import { useParams, useNavigate } from "react-router-dom";
+import { ArrowLeft, Share2, Heart } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useVideos } from "@/hooks/useVideos";
+
+export default function Player() {
+  const { videoId } = useParams();
+  const navigate = useNavigate();
+  const { data: videos } = useVideos();
+
+  // Find the video from our cached data
+  const video = videos?.find((v) => v.id === videoId);
+
+  if (!video) return <div className="text-white p-10">Carregando...</div>;
+
+  return (
+    <div className="min-h-screen bg-black text-white flex flex-col">
+      {/* Top Controls */}
+      <div className="absolute top-0 left-0 right-0 p-4 z-10 flex justify-between items-center bg-gradient-to-b from-black/60 to-transparent">
+        <Button 
+          variant="ghost" 
+          size="icon"
+          onClick={() => navigate(-1)} 
+          className="text-white hover:bg-white/20 rounded-full"
+        >
+          <ArrowLeft className="w-6 h-6" />
+        </Button>
+      </div>
+
+      {/* Video Player Area - Centered */}
+      <div className="flex-1 flex items-center justify-center bg-black w-full">
+        <div className="w-full aspect-video max-h-[80vh] relative">
+          <iframe
+            className="absolute inset-0 w-full h-full"
+            src={`https://www.youtube.com/embed/${video.youtube_id}?autoplay=1&rel=0&modestbranding=1&iv_load_policy=3&controls=1`}
+            title={video.title}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          ></iframe>
+        </div>
+      </div>
+
+      {/* Video Details (Below Player) */}
+      <div className="p-6 bg-black pb-12">
+        <h1 className="text-2xl font-heading font-bold mb-2">{video.title}</h1>
+        <div className="flex items-center justify-between mb-6">
+          <span className="text-gray-400 text-sm font-medium bg-gray-800 px-3 py-1 rounded-full">
+            {video.category}
+          </span>
+          
+          <div className="flex gap-2">
+            <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
+              <Heart className="w-6 h-6" />
+            </Button>
+            <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
+              <Share2 className="w-6 h-6" />
+            </Button>
+          </div>
+        </div>
+        
+        <p className="text-gray-300 leading-relaxed text-sm">
+          {video.description || "Sem descrição disponível para este vídeo."}
+        </p>
+      </div>
+    </div>
+  );
+}
