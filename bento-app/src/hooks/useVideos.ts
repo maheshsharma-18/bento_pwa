@@ -10,6 +10,7 @@ export interface Video {
   thumbnail_url: string | null;
   is_premium: boolean;
   featured: boolean;
+  duration?: number;
 }
 
 export const useVideos = () => {
