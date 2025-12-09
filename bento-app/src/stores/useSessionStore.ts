@@ -1,12 +1,18 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+export interface RoutineSettings {
+  bedtime?: string;
+  wake_up?: string;
+  updated_at?: string;
+}
+
 export interface ChildProfile {
   id: string;
   name: string;
   avatar_url: string | null;
   age: number | null;
-  routine_settings: any;
+  routine_settings: RoutineSettings;
 }
 
 interface SessionState {
