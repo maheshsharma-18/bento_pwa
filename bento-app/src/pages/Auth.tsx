@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input"; // Import Input
 import { Checkbox } from "@/components/ui/checkbox";
-import { supabase } from "@/lib/supabase"; // Import the client we just made
+import { supabase } from "@/lib/supabase";
 import { useNavigate } from "react-router-dom";
 
 export default function Auth() {
@@ -10,63 +11,85 @@ export default function Auth() {
   const navigate = useNavigate();
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [loading, setLoading] = useState(false);
+  
+  // New State for Real Login
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isSignUp, setIsSignUp] = useState(false); // Toggle logic
 
-  // Function to handle Google Login
-  const handleGoogleLogin = async () => {
+  const handleEmailAuth = async () => {
     if (!acceptedTerms) return alert(t('auth.terms_error'));
-    
+    if (!email || !password) return alert("Please enter email and password");
+
     setLoading(true);
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/`,
-      },
-    });
-    if (error) alert(error.message);
+    // Determine if we are Signing Up or Logging In
+    const action = isSignUp ? supabase.auth.signUp : supabase.auth.signInWithPassword;
+    
+    const { error } = await action({ email, password });
+
+    if (error) {
+      alert(error.message);
+    } else {
+      // Login Success!
+      navigate('/'); 
+    }
     setLoading(false);
   };
 
-  // Function for Visitor Mode (Phase 1 Requirement)
-  const handleVisitorMode = () => {
+  const handleGoogleLogin = async () => {
     if (!acceptedTerms) return alert(t('auth.terms_error'));
-    // In real app, we might set a "guest" flag in local storage
-    navigate('/');
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: `${window.location.origin}/` },
+    });
+    if (error) alert(error.message);
   };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-background p-6">
-      <div className="w-full max-w-sm space-y-8 text-center animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="w-full max-w-sm space-y-6 text-center animate-in fade-in duration-500">
         
-        {/* Mascot / Logo Area */}
+        {/* Mascot */}
         <div className="flex flex-col items-center gap-4">
-            {/* Replace this div with: <img src="/assets/icons/mascot.png" className="w-32 h-32" /> */}
-            <div className="w-32 h-32 bg-primary/20 rounded-full flex items-center justify-center text-4xl">
-                🦁
-            </div>
-            <h1 className="text-3xl font-heading font-bold text-primary">
-                {t('auth.welcome_back')}
-            </h1>
+            <div className="w-32 h-32 bg-primary/20 rounded-full flex items-center justify-center text-4xl">🦁</div>
+            <h1 className="text-3xl font-heading font-bold text-primary">{t('auth.welcome_back')}</h1>
         </div>
 
-        {/* Buttons Section */}
-        <div className="space-y-4 w-full pt-4">
+        {/* Real Inputs */}
+        <div className="space-y-3 text-left">
+            <Input 
+                type="email" 
+                placeholder="Email (ex: test@bento.com)" 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="rounded-xl h-12"
+            />
+            <Input 
+                type="password" 
+                placeholder="Password (ex: 123456)" 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="rounded-xl h-12"
+            />
+        </div>
+
+        {/* Auth Buttons */}
+        <div className="space-y-4 w-full pt-2">
             <Button 
-                onClick={handleGoogleLogin}
+                onClick={handleEmailAuth}
                 disabled={loading}
-                className="w-full rounded-3xl h-14 text-lg bg-white border-2 border-primary text-primary hover:bg-primary/5 shadow-sm"
+                className="w-full rounded-3xl h-14 text-lg shadow-lg"
             >
-                {/* Use Google Icon from assets here if available */}
-                <span className="mr-2">G</span> {t('auth.login_google')}
+                {loading ? "Carregando..." : (isSignUp ? "Criar Conta" : "Entrar")}
             </Button>
 
-            <Button 
-                variant="default"
-                disabled={loading}
-                className="w-full rounded-3xl h-14 text-lg shadow-lg shadow-primary/20"
+            <div 
+                className="text-sm text-gray-400 cursor-pointer hover:text-primary underline" 
+                onClick={() => setIsSignUp(!isSignUp)}
             >
-                {t('auth.login_email')}
-            </Button>
-
+                {isSignUp ? "Já tem conta? Entrar" : "Não tem conta? Criar uma"}
+            </div>
+            
             <div className="relative flex py-2 items-center">
                 <div className="flex-grow border-t border-gray-300"></div>
                 <span className="flex-shrink mx-4 text-gray-400 text-sm">ou</span>
@@ -74,31 +97,25 @@ export default function Auth() {
             </div>
 
             <Button 
-                variant="secondary"
-                onClick={handleVisitorMode}
-                className="w-full rounded-3xl h-14 text-lg bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                onClick={handleGoogleLogin}
+                variant="outline"
+                className="w-full rounded-3xl h-14 text-lg border-2 border-primary text-primary"
             >
-                {t('auth.visitor')}
+                <span className="mr-2">G</span> {t('auth.login_google')}
             </Button>
         </div>
 
-        {/* Terms Checkbox (Mandatory) */}
+        {/* Terms */}
         <div className="flex items-start space-x-3 pt-4">
             <Checkbox 
                 id="terms" 
                 checked={acceptedTerms}
-                onCheckedChange={(checked: boolean | "indeterminate") => setAcceptedTerms(checked === true)}
-                className="mt-1 data-[state=checked]:bg-primary data-[state=checked]:text-white border-primary"
+                onCheckedChange={(c) => setAcceptedTerms(c === true)}
+                className="mt-1 data-[state=checked]:bg-primary text-white border-primary"
             />
-            <div className="grid gap-1.5 leading-none">
-                <label
-                    htmlFor="terms"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-text text-left"
-                >
-                    {t('auth.terms')}
-                </label>
-                {/* Add links to actual terms if you have them */}
-            </div>
+            <label htmlFor="terms" className="text-sm font-medium text-text text-left">
+                {t('auth.terms')}
+            </label>
         </div>
 
       </div>
