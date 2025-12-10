@@ -2,6 +2,7 @@ import { useState } from "react";
 import { X, Delete } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/lib/supabase"; // Import Supabase
 
 interface PinGateProps {
   onSuccess: () => void;
@@ -11,24 +12,28 @@ interface PinGateProps {
 export default function PinGate({ onSuccess, onCancel }: PinGateProps) {
   const [pin, setPin] = useState("");
   const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(false); 
 
-  // Hardcoded for Milestone 3 (In real app, fetch from Supabase profile)
-  const CORRECT_PIN = "0000"; 
-
-  const handleNumberClick = (num: string) => {
-    if (pin.length < 4) {
+  const handleNumberClick = async (num: string) => {
+    if (pin.length < 4 && !loading) {
       const newPin = pin + num;
       setPin(newPin);
       setError(false);
       
-      // Auto-submit when 4th digit is entered
       if (newPin.length === 4) {
-        if (newPin === CORRECT_PIN) {
+        setLoading(true);
+        // NEW: Ask the server to verify the PIN securely
+        const { data } = await supabase.rpc('verify_parent_pin', { 
+            pin_attempt: newPin 
+        });
+
+        if (data === true) {
           onSuccess();
         } else {
           setError(true);
-          setTimeout(() => setPin(""), 500); // Clear after error
+          setTimeout(() => setPin(""), 500);
         }
+        setLoading(false);
       }
     }
   };
@@ -54,20 +59,20 @@ export default function PinGate({ onSuccess, onCancel }: PinGateProps) {
           🔒
         </div>
         <h2 className="text-2xl font-heading font-bold text-text mb-2">Área dos Pais</h2>
-        <p className="text-gray-500">Digite o PIN para acessar (0000)</p>
+        <p className="text-gray-500">
+            {loading ? "Verificando..." : "Digite o PIN para acessar"}
+        </p>
       </div>
 
-      {/* PIN Dots Display */}
+      {/* PIN Dots */}
       <div className="flex gap-4 mb-12">
         {[0, 1, 2, 3].map((i) => (
           <div 
             key={i}
             className={cn(
               "w-4 h-4 rounded-full transition-all duration-300",
-              pin.length > i 
-                ? "bg-primary scale-110" 
-                : "bg-gray-200",
-              error && "bg-red-400 animate-shake" // Red on error
+              pin.length > i ? "bg-primary scale-110" : "bg-gray-200",
+              error && "bg-red-400 animate-shake"
             )}
           />
         ))}
@@ -85,7 +90,6 @@ export default function PinGate({ onSuccess, onCancel }: PinGateProps) {
           </button>
         ))}
         
-        {/* Empty placeholder to align 0 */}
         <div /> 
         
         <button

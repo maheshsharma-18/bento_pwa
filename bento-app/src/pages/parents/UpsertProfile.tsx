@@ -76,12 +76,21 @@ export default function UpsertProfile() {
   const handleDelete = async () => {
     if (!confirm("Tem certeza que deseja excluir este perfil?")) return;
     setLoading(true);
-    const { error } = await supabase.from('child_profiles').delete().eq('id', id);
+
+    const { data: { user } } = await supabase.auth.getUser();
+
+    // Defensive Check: We explicitly match parent_id
+    const { error } = await supabase
+        .from('child_profiles')
+        .delete()
+        .eq('id', id)
+        .eq('parent_id', user?.id); 
+
     if (!error) {
         await queryClient.invalidateQueries({ queryKey: ['profiles'] });
         navigate("/parents/profiles");
     } else {
-        alert(error.message);
+        alert("Erro ao excluir: " + error.message);
     }
     setLoading(false);
   };

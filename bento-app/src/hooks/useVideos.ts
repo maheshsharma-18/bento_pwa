@@ -1,26 +1,26 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 
+// Updated Interface: youtube_id is now optional
 export interface Video {
   id: string;
   title: string;
   description: string | null;
   category: string;
-  youtube_id: string;
+  youtube_id?: string; 
   thumbnail_url: string | null;
   is_premium: boolean;
   featured: boolean;
-  duration?: number;
 }
 
 export const useVideos = () => {
   return useQuery({
     queryKey: ['videos'],
     queryFn: async () => {
+      // NEW: Fetch from the SECURE VIEW (No youtube_ids)
       const { data, error } = await supabase
-        .from('videos')
+        .from('public_videos') 
         .select('*')
-        .eq('is_active', true)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
