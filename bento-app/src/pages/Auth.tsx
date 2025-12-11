@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input"; // Import Input
+import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/lib/supabase";
 import { useNavigate } from "react-router-dom";
@@ -12,28 +12,37 @@ export default function Auth() {
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [loading, setLoading] = useState(false);
   
-  // New State for Real Login
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isSignUp, setIsSignUp] = useState(false); // Toggle logic
+  const [isSignUp, setIsSignUp] = useState(false);
 
   const handleEmailAuth = async () => {
     if (!acceptedTerms) return alert(t('auth.terms_error'));
-    if (!email || !password) return alert("Please enter email and password");
+    if (!email || !password) return alert("Por favor, insira email e senha");
 
-    setLoading(true);
-    // Determine if we are Signing Up or Logging In
-    const action = isSignUp ? supabase.auth.signUp : supabase.auth.signInWithPassword;
+    setLoading(true); // Start Spinning Lion 🦁
     
-    const { error } = await action({ email, password });
+    try {
+      // Determine action: Sign Up or Login
+      const action = isSignUp ? supabase.auth.signUp : supabase.auth.signInWithPassword;
+      
+      // CALL SUPABASE
+      const { error } = await action({ email, password });
 
-    if (error) {
-      alert(error.message);
-    } else {
-      // Login Success!
-      navigate('/'); 
+      if (error) {
+        alert("Erro de Autenticação: " + error.message);
+      } else {
+        // Success!
+        navigate('/'); 
+      }
+    } catch (err: any) {
+      // Catch unexpected crashes (Network errors, bad keys, etc.)
+      console.error("Crash:", err);
+      alert("Erro Crítico: " + (err.message || "Verifique o console"));
+    } finally {
+      // ALWAYS STOP LOADING
+      setLoading(false); 
     }
-    setLoading(false);
   };
 
   const handleGoogleLogin = async () => {
@@ -55,7 +64,7 @@ export default function Auth() {
             <h1 className="text-3xl font-heading font-bold text-primary">{t('auth.welcome_back')}</h1>
         </div>
 
-        {/* Real Inputs */}
+        {/* Inputs */}
         <div className="space-y-3 text-left">
             <Input 
                 type="email" 
@@ -66,14 +75,14 @@ export default function Auth() {
             />
             <Input 
                 type="password" 
-                placeholder="Password (ex: 123456)" 
+                placeholder="Senha" 
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="rounded-xl h-12"
             />
         </div>
 
-        {/* Auth Buttons */}
+        {/* Buttons */}
         <div className="space-y-4 w-full pt-2">
             <Button 
                 onClick={handleEmailAuth}

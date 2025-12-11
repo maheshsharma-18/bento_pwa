@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Share2, Heart, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/lib/supabase"; // Import Supabase
+import { supabase } from "@/lib/supabase";
 import { useVideos } from "@/hooks/useVideos";
 
 export default function Player() {
@@ -10,35 +10,48 @@ export default function Player() {
   const navigate = useNavigate();
   const { data: videos } = useVideos();
   
-  // State for the Secure ID
   const [youtubeId, setYoutubeId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [accessDenied, setAccessDenied] = useState(false);
 
-  // Find metadata from cache (Title, Desc, etc.)
   const video = videos?.find((v) => v.id === videoId);
 
   useEffect(() => {
     const fetchVideoId = async () => {
-      if (!videoId) return;
-
-      // CALL THE NEW SECURE RPC
-      const { data } = await supabase.rpc('get_video_embed', { 
-        video_uuid: videoId 
-      });
-
-      if (data) {
-        setYoutubeId(data);
-      } else {
-        setAccessDenied(true); // Premium content blocked
+      // 1. Safety Check: If no ID, stop loading immediately
+      if (!videoId) {
+        setLoading(false);
+        return;
       }
-      setLoading(false);
+
+      try {
+        // 2. Call the Server
+        const { data, error } = await supabase.rpc('get_video_embed', { 
+          video_uuid: videoId 
+        });
+
+        if (error) {
+          console.error("Player Error:", error);
+          setAccessDenied(true); // Treat error as access denied for safety
+        } else if (data) {
+          setYoutubeId(data);
+        } else {
+          setAccessDenied(true);
+        }
+      } catch (err) {
+        console.error("Unexpected Crash:", err);
+        setAccessDenied(true);
+      } finally {
+        // 3. ALWAYS stop loading, even if it crashes
+        setLoading(false);
+      }
     };
 
     fetchVideoId();
   }, [videoId]);
 
-  if (!video) return <div className="text-white p-10">Carregando detalhes...</div>;
+  // Loading State (The Lion)
+  if (!video) return <div className="text-white p-10 text-center">Carregando detalhes...</div>;
 
   return (
     <div className="min-h-screen bg-black text-white flex flex-col">
@@ -61,7 +74,7 @@ export default function Player() {
           {loading && <div className="animate-spin text-4xl">🦁</div>}
 
           {!loading && accessDenied && (
-            <div className="text-center p-6">
+            <div className="text-center p-6 animate-in fade-in">
                 <Lock className="w-12 h-12 text-yellow-500 mx-auto mb-4" />
                 <h2 className="text-xl font-bold mb-2">Conteúdo Premium</h2>
                 <p className="text-gray-400 mb-4">Atualize sua assinatura para assistir.</p>
