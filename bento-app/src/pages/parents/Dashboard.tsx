@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import PinGate from "@/components/parents/PinGate";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Users, Clock, CreditCard } from "lucide-react";
+import { ArrowLeft, Users, Clock, CreditCard, TrendingUp } from "lucide-react";
 
 export default function ParentDashboard() {
   const navigate = useNavigate();
@@ -69,6 +69,19 @@ export default function ParentDashboard() {
             <div>
                 <h3 className="font-heading font-bold text-lg">Assinatura</h3>
                 <p className="text-gray-400 text-sm">Gerenciar plano Premium</p>
+            </div>
+        </div>
+
+        <div 
+          onClick={() => navigate("/parents/affiliates")}
+          className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center gap-4 cursor-pointer hover:border-primary/30 transition-all"
+        >
+            <div className="w-12 h-12 bg-yellow-100 rounded-2xl flex items-center justify-center text-yellow-600">
+                <TrendingUp className="w-6 h-6" />
+            </div>
+            <div>
+                <h3 className="font-heading font-bold text-lg">Programa de Parceiros</h3>
+                <p className="text-gray-400 text-sm">Ganhe dinheiro indicando</p>
             </div>
         </div>
       </div>

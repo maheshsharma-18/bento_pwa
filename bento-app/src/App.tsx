@@ -14,6 +14,7 @@ import ManageProfiles from "./pages/parents/ManageProfiles";
 import UpsertProfile from "./pages/parents/UpsertProfile";
 import RoutineSelect from "./pages/parents/RoutineSelect";
 import RoutineSettings from "./pages/parents/RoutineSettings";
+import AffiliateDashboard from "./pages/parents/AffiliateDashboard";
 
 // 1. Protected Route Component: Checks if Child is Selected
 const ProtectedRoute = () => {
@@ -47,6 +48,7 @@ function App() {
         <Route path="/parents/profiles/:id" element={<UpsertProfile />} />
         <Route path="/parents/routine" element={<RoutineSelect />} />
         <Route path="/parents/routine/:id" element={<RoutineSettings />} />
+        <Route path="/parents/affiliates" element={<AffiliateDashboard />} />
 
         {/* Player Route */}
         <Route path="/player/:videoId" element={<Player />} />
