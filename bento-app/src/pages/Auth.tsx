@@ -20,27 +20,29 @@ export default function Auth() {
     if (!acceptedTerms) return alert(t('auth.terms_error'));
     if (!email || !password) return alert("Por favor, insira email e senha");
 
-    setLoading(true); // Start Spinning Lion 🦁
+    setLoading(true);
     
     try {
-      // Determine action: Sign Up or Login
-      const action = isSignUp ? supabase.auth.signUp : supabase.auth.signInWithPassword;
+      // FIXED: Call the functions directly to keep 'this' context binding
+      let result;
       
-      // CALL SUPABASE
-      const { error } = await action({ email, password });
+      if (isSignUp) {
+        result = await supabase.auth.signUp({ email, password });
+      } else {
+        result = await supabase.auth.signInWithPassword({ email, password });
+      }
+
+      const { error } = result;
 
       if (error) {
         alert("Erro de Autenticação: " + error.message);
       } else {
-        // Success!
         navigate('/'); 
       }
     } catch (err: any) {
-      // Catch unexpected crashes (Network errors, bad keys, etc.)
       console.error("Crash:", err);
       alert("Erro Crítico: " + (err.message || "Verifique o console"));
     } finally {
-      // ALWAYS STOP LOADING
       setLoading(false); 
     }
   };
