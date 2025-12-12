@@ -18,6 +18,8 @@ import AffiliateDashboard from "./pages/parents/AffiliateDashboard";
 import Support from "./pages/parents/Support";
 import Settings from "./pages/parents/Settings";
 import Subscription from "./pages/parents/Subscription";
+import { useNetwork } from "@/hooks/useNetwork"; // Import Hook
+import OfflineScreen from "@/components/layout/OfflineScreen"; // Import Screen
 
 // 1. Protected Route Component: Checks if Child is Selected
 const ProtectedRoute = () => {
@@ -27,9 +29,15 @@ const ProtectedRoute = () => {
 };
 
 function App() {
+  const isOnline = useNetwork(); // 1. Check Network status
   // Temporary: In a real app, this comes from Supabase Auth state
   // For this step, assume the parent IS logged in, but maybe hasn't picked a child
   const isParentLoggedIn = true; 
+
+  // 2. If Offline, STOP everything and show the screen
+  if (!isOnline) {
+    return <OfflineScreen />;
+  } 
 
   return (
     <BrowserRouter>
