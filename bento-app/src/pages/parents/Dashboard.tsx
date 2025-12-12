@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import PinGate from "@/components/parents/PinGate";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Users, Clock, CreditCard, TrendingUp } from "lucide-react";
+import { ArrowLeft, Users, Clock, CreditCard, TrendingUp, MessageSquare, Settings as SettingsIcon } from "lucide-react";
 
 export default function ParentDashboard() {
   const navigate = useNavigate();
@@ -62,7 +62,10 @@ export default function ParentDashboard() {
             </div>
         </div>
 
-        <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center gap-4 cursor-pointer hover:border-primary/30 transition-all">
+        <div 
+          onClick={() => navigate("/parents/subscription")}
+          className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center gap-4 cursor-pointer hover:border-primary/30 transition-all"
+        >
             <div className="w-12 h-12 bg-green-100 rounded-2xl flex items-center justify-center text-green-600">
                 <CreditCard className="w-6 h-6" />
             </div>
@@ -82,6 +85,32 @@ export default function ParentDashboard() {
             <div>
                 <h3 className="font-heading font-bold text-lg">Programa de Parceiros</h3>
                 <p className="text-gray-400 text-sm">Ganhe dinheiro indicando</p>
+            </div>
+        </div>
+
+        <div 
+          onClick={() => navigate("/parents/support")}
+          className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center gap-4 cursor-pointer hover:border-primary/30 transition-all"
+        >
+            <div className="w-12 h-12 bg-pink-100 rounded-2xl flex items-center justify-center text-pink-600">
+                <MessageSquare className="w-6 h-6" />
+            </div>
+            <div>
+                <h3 className="font-heading font-bold text-lg">Ajuda</h3>
+                <p className="text-gray-400 text-sm">Fale com o suporte</p>
+            </div>
+        </div>
+
+        <div 
+          onClick={() => navigate("/parents/settings")}
+          className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center gap-4 cursor-pointer hover:border-primary/30 transition-all"
+        >
+            <div className="w-12 h-12 bg-gray-100 rounded-2xl flex items-center justify-center text-gray-600">
+                <SettingsIcon className="w-6 h-6" />
+            </div>
+            <div>
+                <h3 className="font-heading font-bold text-lg">Configurações</h3>
+                <p className="text-gray-400 text-sm">PIN e Conta</p>
             </div>
         </div>
       </div>
