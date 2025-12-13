@@ -1,5 +1,9 @@
+import { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { useSessionStore } from "@/stores/useSessionStore";
+// FIX: Added 'type' keyword here to satisfy verbatimModuleSyntax
+import type { Session } from "@supabase/supabase-js"; 
+import { supabase } from "@/lib/supabase"; 
 
 import Welcome from "./pages/Welcome";
 import Auth from "./pages/Auth";
@@ -18,56 +22,96 @@ import AffiliateDashboard from "./pages/parents/AffiliateDashboard";
 import Support from "./pages/parents/Support";
 import Settings from "./pages/parents/Settings";
 import Subscription from "./pages/parents/Subscription";
-import { useNetwork } from "@/hooks/useNetwork"; // Import Hook
-import OfflineScreen from "@/components/layout/OfflineScreen"; // Import Screen
+import { useNetwork } from "@/hooks/useNetwork"; 
+import OfflineScreen from "@/components/layout/OfflineScreen"; 
 
-// 1. Protected Route Component: Checks if Child is Selected
+// 1. Protected Route: Ensures Child Profile is Selected
 const ProtectedRoute = () => {
   const { selectedChild } = useSessionStore();
-  // If no child selected, force them to pick one
+  // If no child selected, go to Profile Selector
   return selectedChild ? <Outlet /> : <Navigate to="/who-is-watching" replace />;
 };
 
 function App() {
-  const isOnline = useNetwork(); // 1. Check Network status
-  // Temporary: In a real app, this comes from Supabase Auth state
-  // For this step, assume the parent IS logged in, but maybe hasn't picked a child
-  const isParentLoggedIn = true; 
+  const isOnline = useNetwork();
+  
+  // REAL AUTH STATE
+  const [session, setSession] = useState<Session | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
 
-  // 2. If Offline, STOP everything and show the screen
+  useEffect(() => {
+    // 1. Check active session on load
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setAuthLoading(false);
+    });
+
+    // 2. Listen for login/logout events
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // 1. Network Check
   if (!isOnline) {
     return <OfflineScreen />;
   } 
 
+  // 2. Loading Screen (while checking Supabase)
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-[#FFFDD0] flex items-center justify-center">
+        <div className="animate-spin text-6xl">🦁</div>
+      </div>
+    );
+  }
+
+  // Helper to check login status
+  const isAuthenticated = !!session;
+
   return (
     <BrowserRouter>
       <Routes>
-        {/* Public Routes */}
-        <Route path="/welcome" element={<Welcome />} />
-        <Route path="/auth" element={<Auth />} />
-
-        {/* Profile Selection (Authenticated but no child selected yet) */}
+        {/* --- PUBLIC ROUTES --- */}
+        {/* If logged in, don't show Welcome/Auth, go straight to Profiles */}
         <Route 
-          path="/who-is-watching" 
-          element={isParentLoggedIn ? <WhoIsWatching /> : <Navigate to="/auth" replace />} 
+          path="/welcome" 
+          element={!isAuthenticated ? <Welcome /> : <Navigate to="/who-is-watching" replace />} 
+        />
+        <Route 
+          path="/auth" 
+          element={!isAuthenticated ? <Auth /> : <Navigate to="/who-is-watching" replace />} 
         />
 
-        {/* Parent Area */}
-        <Route path="/parents" element={<ParentDashboard />} />
-        <Route path="/parents/profiles" element={<ManageProfiles />} />
-        <Route path="/parents/profiles/new" element={<UpsertProfile />} />
-        <Route path="/parents/profiles/:id" element={<UpsertProfile />} />
-        <Route path="/parents/routine" element={<RoutineSelect />} />
-        <Route path="/parents/routine/:id" element={<RoutineSettings />} />
-        <Route path="/parents/affiliates" element={<AffiliateDashboard />} />
-        <Route path="/parents/support" element={<Support />} />
-        <Route path="/parents/settings" element={<Settings />} />
-        <Route path="/parents/subscription" element={<Subscription />} />
+        {/* --- AUTHENTICATED ROUTES --- */}
+        
+        {/* Profile Selection (Entry Point for Logged In Users) */}
+        {/* If NOT logged in, kick back to /welcome */}
+        <Route 
+          path="/who-is-watching" 
+          element={isAuthenticated ? <WhoIsWatching /> : <Navigate to="/welcome" replace />} 
+        />
+
+        {/* Parent Area (Protected) */}
+        <Route path="/parents" element={isAuthenticated ? <ParentDashboard /> : <Navigate to="/welcome" />} />
+        <Route path="/parents/profiles" element={isAuthenticated ? <ManageProfiles /> : <Navigate to="/welcome" />} />
+        <Route path="/parents/profiles/new" element={isAuthenticated ? <UpsertProfile /> : <Navigate to="/welcome" />} />
+        <Route path="/parents/profiles/:id" element={isAuthenticated ? <UpsertProfile /> : <Navigate to="/welcome" />} />
+        <Route path="/parents/routine" element={isAuthenticated ? <RoutineSelect /> : <Navigate to="/welcome" />} />
+        <Route path="/parents/routine/:id" element={isAuthenticated ? <RoutineSettings /> : <Navigate to="/welcome" />} />
+        <Route path="/parents/affiliates" element={isAuthenticated ? <AffiliateDashboard /> : <Navigate to="/welcome" />} />
+        <Route path="/parents/support" element={isAuthenticated ? <Support /> : <Navigate to="/welcome" />} />
+        <Route path="/parents/settings" element={isAuthenticated ? <Settings /> : <Navigate to="/welcome" />} />
+        <Route path="/parents/subscription" element={isAuthenticated ? <Subscription /> : <Navigate to="/welcome" />} />
 
         {/* Player Route */}
-        <Route path="/player/:videoId" element={<Player />} />
+        <Route path="/player/:videoId" element={isAuthenticated ? <Player /> : <Navigate to="/welcome" />} />
 
-        {/* Child Protected Routes (Needs Selected Profile) */}
+        {/* --- CHILD AREA (Requires Child Selection) --- */}
         <Route element={<ProtectedRoute />}>
           <Route element={<AppLayout />}>
               <Route path="/" element={<Home />} />
@@ -75,11 +119,10 @@ function App() {
               <Route path="/schedule" element={<Schedule />} />
           </Route>
         </Route>
+
       </Routes>
     </BrowserRouter>
   )
 }
 
-export default App
-
-
+export default App;
