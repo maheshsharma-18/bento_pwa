@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { useSessionStore } from "@/stores/useSessionStore";
+// FIX: Added 'type' keyword here to satisfy verbatimModuleSyntax
 import type { Session } from "@supabase/supabase-js"; 
 import { supabase } from "@/lib/supabase"; 
 
@@ -23,34 +24,46 @@ import Settings from "./pages/parents/Settings";
 import Subscription from "./pages/parents/Subscription";
 import { useNetwork } from "@/hooks/useNetwork"; 
 import OfflineScreen from "@/components/layout/OfflineScreen"; 
-import InitialRedirect from "./pages/InitialRedirect"; // <--- NEW IMPORT
 
-// 1. Protected Route
+// NOTE: InitialRedirect import hata diya hai kyunki file delete kar di.
+
+// 1. Protected Route: Ensures Child Profile is Selected
 const ProtectedRoute = () => {
   const { selectedChild } = useSessionStore();
+  // If no child selected, go to Profile Selector
   return selectedChild ? <Outlet /> : <Navigate to="/who-is-watching" replace />;
 };
 
 function App() {
   const isOnline = useNetwork();
+  
+  // REAL AUTH STATE
   const [session, setSession] = useState<Session | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
 
   useEffect(() => {
+    // 1. Check active session on load
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setAuthLoading(false);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    // 2. Listen for login/logout events
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  if (!isOnline) return <OfflineScreen />;
+  // 1. Network Check
+  if (!isOnline) {
+    return <OfflineScreen />;
+  } 
 
+  // 2. Loading Screen (Wait for Supabase to tell us if user is logged in)
   if (authLoading) {
     return (
       <div className="min-h-screen bg-[#FFFDD0] flex items-center justify-center">
@@ -59,25 +72,42 @@ function App() {
     );
   }
 
+  // Helper to check login status
   const isAuthenticated = !!session;
 
   return (
     <BrowserRouter>
       <Routes>
-        {/* 1. ROOT URL - TRAFFIC POLICE */}
-        <Route path="/" element={<InitialRedirect />} />
+        {/* 1. ROOT URL LOGIC (THE FIX) */}
+        {/* Agar login hai -> WhoIsWatching. Agar nahi -> Welcome. Simple. */}
+        <Route 
+          path="/" 
+          element={
+            isAuthenticated 
+              ? <Navigate to="/who-is-watching" replace /> 
+              : <Navigate to="/welcome" replace />
+          } 
+        />
 
         {/* 2. PUBLIC ROUTES */}
-        <Route path="/welcome" element={!isAuthenticated ? <Welcome /> : <Navigate to="/who-is-watching" replace />} />
-        <Route path="/auth" element={!isAuthenticated ? <Auth /> : <Navigate to="/who-is-watching" replace />} />
+        <Route 
+          path="/welcome" 
+          element={!isAuthenticated ? <Welcome /> : <Navigate to="/who-is-watching" replace />} 
+        />
+        <Route 
+          path="/auth" 
+          element={!isAuthenticated ? <Auth /> : <Navigate to="/who-is-watching" replace />} 
+        />
 
-        {/* 3. PROFILE SELECTION */}
+        {/* --- AUTHENTICATED ROUTES --- */}
+        
+        {/* Profile Selection (Entry Point for Logged In Users) */}
         <Route 
           path="/who-is-watching" 
           element={isAuthenticated ? <WhoIsWatching /> : <Navigate to="/welcome" replace />} 
         />
 
-        {/* 4. PARENT AREA */}
+        {/* Parent Area (Protected) */}
         <Route path="/parents" element={isAuthenticated ? <ParentDashboard /> : <Navigate to="/welcome" />} />
         <Route path="/parents/profiles" element={isAuthenticated ? <ManageProfiles /> : <Navigate to="/welcome" />} />
         <Route path="/parents/profiles/new" element={isAuthenticated ? <UpsertProfile /> : <Navigate to="/welcome" />} />
@@ -89,13 +119,14 @@ function App() {
         <Route path="/parents/settings" element={isAuthenticated ? <Settings /> : <Navigate to="/welcome" />} />
         <Route path="/parents/subscription" element={isAuthenticated ? <Subscription /> : <Navigate to="/welcome" />} />
 
-        {/* 5. PLAYER */}
+        {/* Player Route */}
         <Route path="/player/:videoId" element={isAuthenticated ? <Player /> : <Navigate to="/welcome" />} />
 
-        {/* 6. CHILD AREA (Renamed Home to /home) */}
+        {/* --- CHILD AREA (Requires Child Selection) --- */}
         <Route element={<ProtectedRoute />}>
           <Route element={<AppLayout />}>
-              <Route path="/home" element={<Home />} /> {/* <--- CHANGED FROM / TO /home */}
+              {/* Note: Internal Home is now /home to avoid conflict with Root / */}
+              <Route path="/home" element={<Home />} />
               <Route path="/search" element={<Search />} />
               <Route path="/schedule" element={<Schedule />} />
           </Route>

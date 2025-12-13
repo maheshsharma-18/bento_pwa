@@ -51,7 +51,8 @@ export default function Auth() {
     if (!acceptedTerms) return alert(t('auth.terms_error'));
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/` },
+      // CHANGE: Directly target the profile selection page
+      options: { redirectTo: `${window.location.origin}/who-is-watching` },
     });
     if (error) alert(error.message);
   };
