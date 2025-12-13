@@ -32,9 +32,13 @@ export default function Support() {
   };
 
   const faqs = [
+    { 
+      q: "Qual é o PIN padrão?", 
+      a: "O PIN padrão para novos usuários é 0000. Recomendamos alterá-lo nas Configurações." 
+    },
     { q: "Como cancelo minha assinatura?", a: "Vá em 'Assinatura' no Painel dos Pais e clique em Cancelar." },
     { q: "O vídeo travou, o que fazer?", a: "Verifique sua internet. O Bento precisa de conexão estável." },
-    { q: "Como mudo o PIN?", a: "Em breve você poderá alterar o PIN nas configurações de conta." }
+    { q: "Como mudo o PIN?", a: "Vá em Configurações > Alterar PIN. Você precisará do PIN atual (0000 se for novo)." }
   ];
 
   return (
