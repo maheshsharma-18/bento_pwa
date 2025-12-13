@@ -4,10 +4,12 @@ import { ArrowLeft, Lock, Trash2, AlertTriangle, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/lib/supabase";
+import { useSessionStore } from "@/stores/useSessionStore";
 
 export default function Settings() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const { clearSession } = useSessionStore(); // <--- Get clearSession
 
   // PIN State
   const [oldPin, setOldPin] = useState("");
@@ -42,15 +44,19 @@ export default function Settings() {
 
     setLoading(true);
     try {
-      // 1. Delete Database Data
+      // 1. Delete Database Data (Now works via Cascade)
       const { error } = await supabase.rpc('delete_my_account');
       if (error) throw error;
 
-      // 2. Sign Out
+      // 2. Clear Local State (Zustand) - Important for UX
+      clearSession();
+
+      // 3. Sign Out from Auth
       await supabase.auth.signOut();
       
-      // 3. Redirect
+      // 4. Force Reload to Home
       window.location.href = "/";
+      
     } catch (err: any) {
       alert("Erro ao deletar: " + err.message);
     } finally {
