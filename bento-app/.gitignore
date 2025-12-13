@@ -30,3 +30,4 @@ dist-ssr
 .env.test
 .env.*.local
 .vercel
+.dev-dist
