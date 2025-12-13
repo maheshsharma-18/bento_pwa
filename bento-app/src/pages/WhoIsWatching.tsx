@@ -11,7 +11,7 @@ export default function WhoIsWatching() {
 
   const handleSelectProfile = (profile: any) => {
     setSelectedChild(profile);
-    navigate("/"); // Go to Home after selection
+    navigate("/home"); // <--- CHANGED: Was "/" before, now "/home"
   };
 
   const handleParentArea = () => {

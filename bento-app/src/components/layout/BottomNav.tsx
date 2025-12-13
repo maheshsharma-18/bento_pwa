@@ -8,7 +8,7 @@ export default function BottomNav() {
   const navItems = [
     {
       label: "Início",
-      path: "/",
+      path: "/home", // <--- CHANGED: Was "/" before, now "/home"
       icon: House
     },
     {
