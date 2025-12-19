@@ -1,0 +1,138 @@
+TECHNICAL SPECIFICATION DOCUMENT: "BENTO" APP (FINAL VERSION) 
+
+1. Product Overview 
+"Bento" is a high-performance PWA (Progressive Web App) designed as a streaming  platform for kids (Netflix-style), but with a core differentiator: Routine Management &  Screen Time Control. The app provides safe, curated content and tools for parents to  schedule when and what their children watch. 
+Visual Identity & UX: 
+• Vibe: "Netflix Kids" but softer and safer. Palette: Cream Background  (#FFFDD0), Baby Blue, Mint Green. 
+• Mascot: "Bento" (a little lion), present in loading screens, error states, and  lock screens. 
+• Design System: Large rounded buttons (rounded-3xl), accessible typography,  fluid animations. 
+• Audio: The UI must be silent by default (no repetitive background music), with  optional sound effects for feedback. 
+
+2. Tech Stack (Strict Requirements) 
+• Frontend: React (Vite) + TypeScript + Tailwind CSS. 
+• UI Library: Shadcn/UI (Radix Primitives) + Lucide Icons. 
+• Mobile Experience: 
+o Viewport configuration: user-scalable=no (prevent zooming). 
+o manifest.json: Configured for TWA (Trusted Web Activity) with  maskable icons. 
+o Animations: Framer Motion for page transitions and micro 
+interactions. 
+• State Management: 
+o Server State: TanStack Query (React Query) for aggressive caching. o Client State: Zustand (Session, Player, Cart). 
+• Backend (BaaS): Supabase. 
+o Auth: Email/Password + Google Social Login. 
+o Database: PostgreSQL with RLS (Row Level Security) strictly enforced. 
+o Logic: Supabase Edge Functions for sensitive logic (payments,  commissions).
+
+3. Data Modeling (Critical Schema) 
+The system must support Multiple Child Profiles per Parent Account. 
+• profiles (Parents): id (uuid), email, subscription_status (free/premium),  stripe_customer_id. 
+• child_profiles: id, parent_id (FK), name, age, avatar_url, routine_settings (JSONB with time rules). 
+• videos: id, youtube_id, title, category, is_premium (bool), duration, is_active. • watch_history: child_profile_id, video_id, progress_seconds, last_watched_at. 
+• support_tickets: user_id, subject, message, status (open/resolved),  attachment_url, created_at. 
+• content_reports: video_id, reporter_id, reason (broken_link/inappropriate),  status. 
+• affiliate_profiles: user_id, referral_code (unique), pix_key, cpf,  balance_pending, balance_available. 
+• referrals: referrer_id, referee_id (the new user), status (trial/paid),  commission_val. 
+• payout_requests: affiliate_id, amount, status (requested/paid), paid_at. 
+
+4. User Flow & Onboarding 
+Rule: The user does NOT see the login screen immediately. 
+1. Welcome Carousel (3 Slides): 
+o Slide 1: Safe Curation ("Only good content"). 
+o Slide 2: Routine ("Peace of mind for parents"). 
+o Slide 3: Transparency ("No ads. We use clean YouTube embeds"). o Action: "Get Started" button appears only on Slide 3. 
+2. Auth Screen: 
+o Buttons: "Continue with Google", "Email", "Visitor Mode". 
+o Sign Up: Mandatory Checkbox for Terms of Use. 
+3. Initial Setup (Wizard): 
+o Immediately after account creation, force the creation of the First  Child Profile (Name, Age). 
+4. Profile Switcher: 
+o Whenever the app opens (if logged in): Show "Who is watching?". o List of Child Avatars + "Manage Profiles" button (Protected by PIN).
+
+5. Business Logic: Freemium & Payments 
+Critical Requirement for Store Compliance (Reader-Only Model): The app must detect  if it is running in a Web Browser or as an Installed App (TWA/Android) to handle  payments correctly. 
+• Mode A: Web Browser (Standard) 
+o Action: Show "Subscribe" buttons clearly. 
+o Checkout: Redirect to Stripe Checkout/External Gateway. 
+• Mode B: TWA / Installed App (Google Play Mode) 
+o Action: HIDE all "Subscribe/Buy" buttons. 
+o Compliance: Display informational text only: "To manage your  subscription, please visit our website on your computer or browser." 
+o Reason: To avoid Google Play Billing requirements and fees. 
+General Rules: 
+• Free User (Visitor): 
+o Can see all categories but with a "Lock" icon on Premium items. o Access limited to a specific "Tasting Playlist". 
+o Security: The frontend code must NEVER fetch/render the YouTube  URL of premium videos for free users. 
+o Routine Demo: Can configure and test the routine logic ONCE. After  that, it locks. 
+• Paywall: 
+o Plans: Monthly, Annual, Lifetime. 
+o Compliance: Visible links to "Terms" and "Privacy Policy". "Restore  Purchases" button. 
+o Webhook: Edge Function receives confirmation -> Updates  
+profiles.subscription_status -> Unlocks access. 
+
+6. Core Experience: Home, Player & Offline 
+• Home Screen: 
+o Hero Section: Giant featured banner (manageable by Admin). 
+o Rails: Horizontal scrollable lists by category. 
+• Video Player: 
+o Clean YouTube Embed (ModestBranding, no related videos from YT).
+o Series Logic: If it's a series, show the episode list below/beside for  quick switching. 
+o Content Reporting: Discrete button/menu: "Report Video". Reasons:  "Inappropriate", "Broken Link". Sends alert to Admin. 
+• Offline Handling (No Internet): 
+o Monitor navigator.onLine. 
+o If connection is lost: Hide the standard UI. Show a Full-Screen  "Sleeping Bento" illustration. 
+o Message: "Oops, Bento needs internet to wake up. Check your Wi-Fi." o Action: Block navigation to prevent browser error pages. 
+
+7. The Differentiator: Routine & Smart Lock 
+Routine settings are linked to the specific child_profile_id. 
+• Configuration UI (Parents): 
+o Select Time Range (e.g., 09:00 to 10:00). 
+o Select Action: "Allow Category X" OR "Block App". 
+• Execution (Home): 
+o If it is "Prayer Time": Only the "Prayer" category is visible. 
+o If it is "Lock Time": The app shows a Friendly Lock Screen (Mascot  Bento saying "Time to play outside!"). The player stops. 
+o Manual override requires the Parent PIN. 
+
+8. Parent Area & Settings (PIN Protected) 
+Access restricted via a 4-digit PIN. 
+A. Support Module: 
+1. Interactive FAQ: Accordion with top questions (Cancellation, Routine, Bugs). 
+2. Premium Support: Floating WhatsApp Button (Visible ONLY if  subscription_status === active). 
+3. Free Support (Ticket System): 
+o Form: Subject, Message, Screenshot Upload. 
+o Saves to support_tickets table via Supabase. 
+o History: Parent sees a list of their tickets with status (Open/Resolved). B. App Settings:
+1. Audio: Toggle "Background Music" (On/Off). Toggle "Sound Effects" (On/Off). 2. Playback: Toggle "Autoplay" (Should the next video start automatically?). 
+3. Notifications (Web Push): Granular toggles -> "Promotions", "New Content",  "Routine Alerts". 
+4. Device Management (Sessions): 
+o List active sessions (User Agent + IP + Date). 
+o Panic Button: "Log out from all other devices" (Invalidate old tokens). C. Account Management: 
+• "Delete My Account" button (Store Requirement): Soft delete + Logout. • Subscription Status + Link to Billing Portal. 
+
+9. Affiliate System (Detailed Logic) 
+Native referral engine. 
+A. Backend Rules (Edge Functions): 
+• Commission: 20% of the first paid subscription value. 
+• Flow: 
+1. Payment Webhook identifies referral_code. 
+2. Credits value to affiliate_profiles table as balance_pending. 
+3. D+15 Job: A cron job/function moves funds from pending to available 15 days after payment (Refund guarantee period). 
+B. User Dashboard (Frontend): 
+• Toggle "Become a Partner" (Generates unique link). 
+• Referral Table: Columns: [Name] | [Plan] | [Date] | [Commission] | [Status  (Pending/Released)]. 
+• Payout Data: Persistent fields for PIX Key (or Bank ID) and Tax ID (CPF). 
+• Visual Cap: A progress bar showing monthly earnings. If it hits $500.00, show  warning: "Monthly auto-limit reached. Contact support to upgrade level." 
+• Request Payout: Button enabled ONLY if balance_available > $50.00. Creates a  record in payout_requests. 
+
+10. Super Admin Panel (Backoffice) 
+Restricted access (Master Email only).
+A. Dashboard: Metrics for MRR, Total Users (Free/Paid), Top 5 Affiliates. B. Content  CMS: 
+• CRUD for Videos and Playlists. 
+• Hero Manager: Selector to choose which content appears on the Home  Banner. 
+• Report Management: List of reported videos -> Button to Hide Video or Reject  Report. C. CRM & Support: 
+• Search User by Email/Name. 
+• Impersonation: Button "Log in as User" (to debug client-side issues). • Manual Premium Grant (for support/partners). D. Affiliate Finance: • Table of Payout Requests. 
+• Action: Button "Mark as Paid" (Input for Transaction ID). This deducts the user  balance and sends an email notification. E. Emergency: Global Switch  "Maintenance Mode" (Blocks general access). 
+
+11. Compliance 
+• Google Play Policy: The app must strictly adhere to the "Reader-Only" policy  for digital goods. No direct links to external checkout are allowed inside the  TWA/Android package. 
+• Explicit "Terms of Use" and "Privacy Policy" links. 
+• GDPR/LGPD compliant data handling (Data deletion flow).
