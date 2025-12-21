@@ -1,28 +1,20 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import PinGate from "@/components/parents/PinGate";
+// REMOVE: import PinGate ...
+// REMOVE: import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Users, Clock, CreditCard, TrendingUp, MessageSquare, Settings as SettingsIcon } from "lucide-react";
 
 export default function ParentDashboard() {
   const navigate = useNavigate();
-  // State to track if PIN is verified
-  const [isVerified, setIsVerified] = useState(false);
+  // REMOVE: const [isVerified, setIsVerified] = useState(false);
 
-  // If not verified, show PIN Gate
-  if (!isVerified) {
-    return (
-      <PinGate 
-        onSuccess={() => setIsVerified(true)} 
-        onCancel={() => navigate("/who-is-watching")}
-      />
-    );
-  }
+  // REMOVE: The entire if (!isVerified) block. 
+  // The ParentGate wrapper now handles security before this component even loads.
 
-  // Once verified, show the Actual Dashboard
   return (
     <div className="min-h-screen bg-background p-6">
-      <header className="flex items-center gap-4 mb-8">
+      {/* ... (Keep the rest of the UI exactly as it is) ... */}
+       <header className="flex items-center gap-4 mb-8">
         <Button 
             variant="ghost" 
             size="icon" 
@@ -35,8 +27,11 @@ export default function ParentDashboard() {
       </header>
 
       <div className="grid grid-cols-1 gap-4">
-        {/* Menu Items */}
-        <div 
+         {/* ... (Keep all menu items exactly as they are) ... */}
+         {/* ... copy existing JSX ... */}
+         
+         {/* Example Item 1 */}
+         <div 
           onClick={() => navigate("/parents/profiles")}
           className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center gap-4 cursor-pointer hover:border-primary/30 transition-all"
         >
@@ -49,7 +44,8 @@ export default function ParentDashboard() {
             </div>
         </div>
 
-        <div 
+        {/* ... Keep the rest of the items (Routine, Subscription, etc.) ... */}
+         <div 
           onClick={() => navigate("/parents/routine")}
           className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center gap-4 cursor-pointer hover:border-primary/30 transition-all"
         >
@@ -113,6 +109,7 @@ export default function ParentDashboard() {
                 <p className="text-gray-400 text-sm">PIN e Conta</p>
             </div>
         </div>
+
       </div>
     </div>
   );

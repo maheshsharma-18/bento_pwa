@@ -1,3 +1,5 @@
+import { useEffect } from "react"; // Add useEffect
+// ... imports
 import { useNavigate } from "react-router-dom";
 import { Plus, Settings } from "lucide-react";
 import { useProfiles } from "@/hooks/useProfiles";
@@ -7,7 +9,12 @@ import { Button } from "@/components/ui/button";
 export default function WhoIsWatching() {
   const navigate = useNavigate();
   const { data: profiles, isLoading } = useProfiles();
-  const { setSelectedChild } = useSessionStore();
+  const { setSelectedChild, lockParentMode } = useSessionStore(); // Get lockParentMode
+
+  // LOCK ON MOUNT: If they are on this screen, Parent Mode should be locked.
+  useEffect(() => {
+    lockParentMode();
+  }, [lockParentMode]);
 
   const handleSelectProfile = (profile: any) => {
     setSelectedChild(profile);

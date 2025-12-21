@@ -22,6 +22,7 @@ import AffiliateDashboard from "./pages/parents/AffiliateDashboard";
 import Support from "./pages/parents/Support";
 import Settings from "./pages/parents/Settings";
 import Subscription from "./pages/parents/Subscription";
+import ParentGate from "@/components/parents/ParentGate"; // <--- NEW IMPORT
 import { useNetwork } from "@/hooks/useNetwork"; 
 import OfflineScreen from "@/components/layout/OfflineScreen"; 
 
@@ -118,6 +119,20 @@ function App() {
         <Route path="/parents/support" element={isAuthenticated ? <Support /> : <Navigate to="/welcome" />} />
         <Route path="/parents/settings" element={isAuthenticated ? <Settings /> : <Navigate to="/welcome" />} />
         <Route path="/parents/subscription" element={isAuthenticated ? <Subscription /> : <Navigate to="/welcome" />} />
+
+        {/* 4. PARENT AREA (Now Protected by ParentGate) */}
+        <Route element={isAuthenticated ? <ParentGate /> : <Navigate to="/welcome" />}>
+            <Route path="/parents" element={<ParentDashboard />} />
+            <Route path="/parents/profiles" element={<ManageProfiles />} />
+            <Route path="/parents/profiles/new" element={<UpsertProfile />} />
+            <Route path="/parents/profiles/:id" element={<UpsertProfile />} />
+            <Route path="/parents/routine" element={<RoutineSelect />} />
+            <Route path="/parents/routine/:id" element={<RoutineSettings />} />
+            <Route path="/parents/affiliates" element={<AffiliateDashboard />} />
+            <Route path="/parents/support" element={<Support />} />
+            <Route path="/parents/settings" element={<Settings />} />
+            <Route path="/parents/subscription" element={<Subscription />} />
+        </Route>
 
         {/* Player Route */}
         <Route path="/player/:videoId" element={isAuthenticated ? <Player /> : <Navigate to="/welcome" />} />
