@@ -1,0 +1,97 @@
+.
+├── README.md
+├── components.json
+├── dev-dist
+│   ├── registerSW.js
+│   ├── sw.js
+│   ├── workbox-5a5d9309.js
+│   └── workbox-af8ff8c3.js
+├── eslint.config.js
+├── index.html
+├── package-lock.json
+├── package.json
+├── postcss.config.js
+├── prd.txt
+├── public
+│   ├── pwa-192x192.png
+│   ├── pwa-512x512.png
+│   └── vite.svg
+├── src
+│   ├── App.tsx
+│   ├── assets
+│   │   ├── icons
+│   │   │   ├── heart_icon.png
+│   │   │   ├── home_icon.png
+│   │   │   ├── locker_icon.png
+│   │   │   └── magnifying_glass_icon.png
+│   │   └── mascot
+│   │       ├── bw_lion.png
+│   │       ├── color_lion.png
+│   │       ├── color_lion_head.png
+│   │       ├── favicon.png
+│   │       ├── loading_icon.png
+│   │       ├── locked_icon.png
+│   │       └── sleep_icon.png
+│   ├── components
+│   │   ├── kids
+│   │   │   ├── HeroBanner.tsx
+│   │   │   ├── LockScreen.tsx
+│   │   │   └── VideoRail.tsx
+│   │   ├── layout
+│   │   │   ├── AppLayout.tsx
+│   │   │   ├── BottomNav.tsx
+│   │   │   └── OfflineScreen.tsx
+│   │   ├── parents
+│   │   │   └── PinGate.tsx
+│   │   ├── shared
+│   │   └── ui
+│   │       ├── button.tsx
+│   │       ├── checkbox.tsx
+│   │       ├── input.tsx
+│   │       └── label.tsx
+│   ├── features
+│   │   ├── auth
+│   │   ├── kids
+│   │   └── parents
+│   ├── hooks
+│   │   ├── useAffiliate.ts
+│   │   ├── useNetwork.ts
+│   │   ├── useProfiles.ts
+│   │   ├── useRoutineCheck.ts
+│   │   ├── useSupport.ts
+│   │   └── useVideos.ts
+│   ├── index.css
+│   ├── lib
+│   │   ├── i18n.ts
+│   │   ├── platform.ts
+│   │   ├── supabase.ts
+│   │   └── utils.ts
+│   ├── main.tsx
+│   ├── pages
+│   │   ├── Auth.tsx
+│   │   ├── Home.tsx
+│   │   ├── Player.tsx
+│   │   ├── Schedule.tsx
+│   │   ├── Search.tsx
+│   │   ├── Welcome.tsx
+│   │   ├── WhoIsWatching.tsx
+│   │   └── parents
+│   │       ├── AffiliateDashboard.tsx
+│   │       ├── Dashboard.tsx
+│   │       ├── ManageProfiles.tsx
+│   │       ├── RoutineSelect.tsx
+│   │       ├── RoutineSettings.tsx
+│   │       ├── Settings.tsx
+│   │       ├── Subscription.tsx
+│   │       ├── Support.tsx
+│   │       └── UpsertProfile.tsx
+│   ├── services
+│   └── stores
+│       └── useSessionStore.ts
+├── tailwind.config.js
+├── tsconfig.app.json
+├── tsconfig.json
+├── tsconfig.node.json
+└── vite.config.ts
+
+23 directories, 72 files
