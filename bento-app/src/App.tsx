@@ -26,6 +26,16 @@ import ParentGate from "@/components/parents/ParentGate"; // <--- NEW IMPORT
 import { useNetwork } from "@/hooks/useNetwork"; 
 import OfflineScreen from "@/components/layout/OfflineScreen"; 
 
+// Add this helper function at the top (or in utils, but here is fine for now)
+const saveReferralCode = () => {
+  const params = new URLSearchParams(window.location.search);
+  const refCode = params.get("ref");
+  if (refCode) {
+    localStorage.setItem("bento_ref_code", refCode);
+    console.log("🦁 Referral Code Captured:", refCode);
+  }
+};
+
 // NOTE: InitialRedirect import hata diya hai kyunki file delete kar di.
 
 // 1. Protected Route: Ensures Child Profile is Selected
@@ -43,6 +53,9 @@ function App() {
   const [authLoading, setAuthLoading] = useState(true);
 
   useEffect(() => {
+    // 0. CAPTURE REFERRAL (Run once on mount)
+    saveReferralCode();
+
     // 1. Check active session on load
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);

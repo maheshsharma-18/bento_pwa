@@ -22,12 +22,23 @@ export default function Auth() {
 
     setLoading(true);
     
+    // 1. Get Stored Referral Code
+    const referralCode = localStorage.getItem("bento_ref_code");
+    
     try {
-      // FIXED: Call the functions directly to keep 'this' context binding
       let result;
       
       if (isSignUp) {
-        result = await supabase.auth.signUp({ email, password });
+        result = await supabase.auth.signUp({ 
+          email, 
+          password,
+          options: {
+            // PASS TO SUPABASE HERE
+            data: { 
+              referral_code: referralCode // Can be null, that's okay
+            }
+          }
+        });
       } else {
         result = await supabase.auth.signInWithPassword({ email, password });
       }
@@ -49,10 +60,27 @@ export default function Auth() {
 
   const handleGoogleLogin = async () => {
     if (!acceptedTerms) return alert(t('auth.terms_error'));
+   
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      // CHANGE: Directly target the profile selection page
-      options: { redirectTo: `${window.location.origin}/who-is-watching` },
+      options: { 
+        redirectTo: `${window.location.origin}/who-is-watching`,
+        // PASS TO SUPABASE HERE (Google Flow)
+        queryParams: {
+            // Note: OAuth metadata handling can be tricky. 
+            // Ideally, we pass it in 'data', but Supabase OAuth options are limited.
+            // For robust Google referral tracking, we usually rely on the Browser Cookie 
+            // matching the Session later, BUT Supabase triggers can sometimes access query params 
+            // depending on setup.
+            // A safer bet for Google Auth referrals is handling it POST-login if metadata fails.
+            // However, let's try passing it via standard options if supported by your version.
+        }
+        // Actually, strictly speaking, Supabase signInWithOAuth doesn't support passing 'data' 
+        // to the trigger immediately like signUp does. 
+        // FIX: For Google, we will rely on the LocalStorage check inside a separate hook 
+        // or just accept Email referrals for this MVP Phase. 
+        // Let's stick to Email Referral for Phase 4 to be 100% sure it works via Trigger.
+      },
     });
     if (error) alert(error.message);
   };
