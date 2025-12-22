@@ -12,7 +12,7 @@ export default function AdminGate() {
 
       // HARDCODED SECURITY CHECK (Matches the SQL Policy)
       // Replace with Matheus's real email
-      if (user?.email === 'matheus@bento.com') {
+      if (user?.email === 'photosvideos8169@gmail.com') {
         setIsAdmin(true);
       } else {
         alert("Acesso Negado: Área restrita para Super Admin.");
