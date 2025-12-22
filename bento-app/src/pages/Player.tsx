@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Share2, Heart, Lock } from "lucide-react";
+import { ArrowLeft, Share2, Heart, Lock, Flag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
 import { useVideos } from "@/hooks/useVideos";
@@ -9,78 +9,99 @@ export default function Player() {
   const { videoId } = useParams();
   const navigate = useNavigate();
   const { data: videos } = useVideos();
-  
+
   const [youtubeId, setYoutubeId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [accessDenied, setAccessDenied] = useState(false);
+  const [reporting, setReporting] = useState(false);
 
   const video = videos?.find((v) => v.id === videoId);
 
   useEffect(() => {
     const fetchVideoId = async () => {
-      // 1. Safety Check: If no ID, stop loading immediately
-      if (!videoId) {
-        setLoading(false);
-        return;
+      if (!videoId) { 
+        setLoading(false); 
+        return; 
       }
-
       try {
-        // 2. Call the Server
-        const { data, error } = await supabase.rpc('get_video_embed', { 
-          video_uuid: videoId 
-        });
-
-        if (error) {
-          console.error("Player Error:", error);
-          setAccessDenied(true); // Treat error as access denied for safety
-        } else if (data) {
-          setYoutubeId(data);
-        } else {
-          setAccessDenied(true);
+        const { data, error } = await supabase.rpc('get_video_embed', { video_uuid: videoId });
+        if (error || !data) { 
+          setAccessDenied(true); 
+        } else { 
+          setYoutubeId(data); 
         }
-      } catch (err) {
-        console.error("Unexpected Crash:", err);
-        setAccessDenied(true);
-      } finally {
-        // 3. ALWAYS stop loading, even if it crashes
-        setLoading(false);
+      } catch { 
+        setAccessDenied(true); 
+      } finally { 
+        setLoading(false); 
       }
     };
-
     fetchVideoId();
   }, [videoId]);
 
-  // Loading State (The Lion)
-  if (!video) return <div className="text-white p-10 text-center">Carregando detalhes...</div>;
+  const handleReport = async () => {
+    const reason = prompt("Qual o problema?\n1. Link quebrado\n2. Conteúdo Impróprio\n3. Outro");
+    
+    if (!reason) return;
+
+    setReporting(true);
+    const { data: { user } } = await supabase.auth.getUser();
+
+    const { error } = await supabase.from('content_reports').insert({
+      video_id: videoId,
+      reporter_id: user?.id,
+      reason: reason,
+      status: 'open'
+    });
+
+    setReporting(false);
+
+    if (error) {
+      alert("Erro ao enviar reporte.");
+      console.error(error);
+    } else {
+      alert("Obrigado! Verificaremos o vídeo.");
+    }
+  };
+
+  if (!video) return <div className="text-white p-10 text-center">Carregando...</div>;
 
   return (
     <div className="min-h-screen bg-black text-white flex flex-col">
       {/* Top Controls */}
-      <div className="absolute top-0 left-0 right-0 p-4 z-10 flex justify-between items-center bg-gradient-to-b from-black/60 to-transparent">
-        <Button 
-          variant="ghost" 
-          size="icon"
-          onClick={() => navigate(-1)} 
-          className="text-white hover:bg-white/20 rounded-full"
-        >
-          <ArrowLeft className="w-6 h-6" />
-        </Button>
+      <div className="absolute top-0 left-0 right-0 p-4 z-10 flex justify-between items-center bg-gradient-to-b from-black/60 to-transparent pointer-events-none">
+        <div className="pointer-events-auto">
+          <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="text-white hover:bg-white/20 rounded-full">
+            <ArrowLeft className="w-6 h-6" />
+          </Button>
+        </div>
+        
+        {/* Report Button */}
+        <div className="pointer-events-auto">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={handleReport} 
+            disabled={reporting} 
+            className="text-white/50 hover:text-red-400 hover:bg-white/10 rounded-full"
+          >
+            <Flag className="w-5 h-5" />
+          </Button>
+        </div>
       </div>
 
       {/* Video Player Area */}
       <div className="flex-1 flex items-center justify-center bg-black w-full">
         <div className="w-full aspect-video max-h-[80vh] relative bg-gray-900 flex items-center justify-center">
-          
           {loading && <div className="animate-spin text-4xl">🦁</div>}
 
           {!loading && accessDenied && (
             <div className="text-center p-6 animate-in fade-in">
-                <Lock className="w-12 h-12 text-yellow-500 mx-auto mb-4" />
-                <h2 className="text-xl font-bold mb-2">Conteúdo Premium</h2>
-                <p className="text-gray-400 mb-4">Atualize sua assinatura para assistir.</p>
-                <Button onClick={() => navigate('/parents')} className="bg-yellow-500 hover:bg-yellow-600 text-black">
-                    Gerenciar Assinatura
-                </Button>
+              <Lock className="w-12 h-12 text-yellow-500 mx-auto mb-4" />
+              <h2 className="text-xl font-bold mb-2">Conteúdo Premium</h2>
+              <Button onClick={() => navigate('/parents')} className="bg-yellow-500 text-black">
+                Gerenciar Assinatura
+              </Button>
             </div>
           )}
 
