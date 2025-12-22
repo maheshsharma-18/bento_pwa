@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 // REMOVE: import PinGate ...
 // REMOVE: import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Users, Clock, CreditCard, TrendingUp, MessageSquare, Settings as SettingsIcon } from "lucide-react";
+import { ArrowLeft, Users, Clock, CreditCard, TrendingUp, MessageSquare, Settings as SettingsIcon, SlidersHorizontal } from "lucide-react";
 
 export default function ParentDashboard() {
   const navigate = useNavigate();
@@ -94,6 +94,19 @@ export default function ParentDashboard() {
             <div>
                 <h3 className="font-heading font-bold text-lg">Ajuda</h3>
                 <p className="text-gray-400 text-sm">Fale com o suporte</p>
+            </div>
+        </div>
+
+        <div 
+          onClick={() => navigate("/parents/app-settings")}
+          className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center gap-4 cursor-pointer hover:border-primary/30 transition-all"
+        >
+            <div className="w-12 h-12 bg-teal-100 rounded-2xl flex items-center justify-center text-teal-600">
+                <SlidersHorizontal className="w-6 h-6" />
+            </div>
+            <div>
+                <h3 className="font-heading font-bold text-lg">Preferências</h3>
+                <p className="text-gray-400 text-sm">Áudio e Reprodução</p>
             </div>
         </div>
 

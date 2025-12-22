@@ -22,6 +22,7 @@ import AffiliateDashboard from "./pages/parents/AffiliateDashboard";
 import Support from "./pages/parents/Support";
 import Settings from "./pages/parents/Settings";
 import Subscription from "./pages/parents/Subscription";
+import AppSettings from "./pages/parents/AppSettings"; // <--- NEW IMPORT
 import ParentGate from "@/components/parents/ParentGate"; // <--- NEW IMPORT
 import { useNetwork } from "@/hooks/useNetwork"; 
 import OfflineScreen from "@/components/layout/OfflineScreen"; 
@@ -143,6 +144,7 @@ function App() {
             <Route path="/parents/routine/:id" element={<RoutineSettings />} />
             <Route path="/parents/affiliates" element={<AffiliateDashboard />} />
             <Route path="/parents/support" element={<Support />} />
+            <Route path="/parents/app-settings" element={<AppSettings />} /> {/* <--- NEW ROUTE */}
             <Route path="/parents/settings" element={<Settings />} />
             <Route path="/parents/subscription" element={<Subscription />} />
         </Route>
