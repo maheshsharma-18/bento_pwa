@@ -24,6 +24,8 @@ import Settings from "./pages/parents/Settings";
 import Subscription from "./pages/parents/Subscription";
 import AppSettings from "./pages/parents/AppSettings"; // <--- NEW IMPORT
 import ParentGate from "@/components/parents/ParentGate"; // <--- NEW IMPORT
+import AdminGate from "@/pages/admin/AdminGate"; // <--- NEW IMPORT
+import AdminDashboard from "@/pages/admin/AdminDashboard"; // <--- NEW IMPORT
 import { useNetwork } from "@/hooks/useNetwork"; 
 import OfflineScreen from "@/components/layout/OfflineScreen"; 
 
@@ -147,6 +149,11 @@ function App() {
             <Route path="/parents/app-settings" element={<AppSettings />} /> {/* <--- NEW ROUTE */}
             <Route path="/parents/settings" element={<Settings />} />
             <Route path="/parents/subscription" element={<Subscription />} />
+        </Route>
+
+        {/* 5. ADMIN AREA (Protected by AdminGate) */}
+        <Route element={isAuthenticated ? <AdminGate /> : <Navigate to="/welcome" />}>
+            <Route path="/admin" element={<AdminDashboard />} />
         </Route>
 
         {/* Player Route */}
