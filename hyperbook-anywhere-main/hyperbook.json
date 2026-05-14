@@ -1,0 +1,13 @@
+{
+  "name": "Hyperbook GitHub Pages",
+  "logo": "/logo.png",
+  "version": "0.0.1",
+  "description": "This is an example for deploying Hyperbook on GitHub pages",
+  "author": {
+    "name": "Mike Barkmin",
+    "url": "https://barkmin.eu"
+  },
+  "license": "CC-BY-SA",
+  "language": "en",
+  "basePath": "/hyperbook-anywhere"
+}
